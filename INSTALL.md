@@ -9,6 +9,8 @@ report back after each one that needs a decision.
 - It is `$HERDR_APP_HOME` if set, else `~/.config/herdr-app` (on Windows: `%USERPROFILE%\.config\herdr-app`).
 - It must contain `AGENTS.md`, `layouts/` and `mods/`. If it does not, stop: Herdr is not installed or has
   not run yet.
+- The layout also uses Herdr's own mods `workspace-chrome` and `pane` (every install has them; several mods
+  load icons from `mods/workspace-chrome/`). If either is missing, stop and tell the user.
 - Read the section "Layouts and mods other people made" in that `AGENTS.md`. Where it and this file differ,
   the user's `AGENTS.md` wins.
 
@@ -34,8 +36,14 @@ user agrees.
 - Copy `layouts/agent-workspace.json` into `<Herdr home>/layouts/`.
 - Copy every folder in `mods/` into `<Herdr home>/mods/`.
 - **Never overwrite.** If a layout or mod name is already taken (by the user or by Herdr), give the new one
-  another name and change every reference to it: its file or folder name, the `"mod"` names in the layout
-  (including `"terminal_menu": "menu-tr"`), and the `mods/<name>/` paths inside the copied mods.
+  another name (for example `quota-aw`) and change every reference to it:
+  - its file or folder name;
+  - the `"mod"` names in the layout, including `"terminal_menu": "menu-tr"`;
+  - inside all copied mods: `mods/<name>/` paths and mod names in code, such as
+    `openOverlay({ mod: "<name>" ... })` (search for the old name in quotes).
+  A renamed mod keeps its shared-store keys (for example `quota.*`); mention this if the user's own mod
+  with that name might use the same keys.
+- Keep each file's line endings when you edit it (the files use CRLF).
 - Do not copy `README.md`, `RECIPE.md`, `INSTALL.md`, `I18N.md`, `LICENSE*`, `NOTICE`, `preview.png`,
   `screenshots/`, `.gitignore` or `.herdr-export.json`.
 
@@ -51,8 +59,11 @@ herdr-app do layout.switch --name agent-workspace
 herdr-app status
 ```
 
-`status` must show `"layout": "agent-workspace"` and `"errors": []`. If Herdr is not running, tell the user to
-start it and switch with `ctrl-shift-l`.
+`status` must show `"layout": "agent-workspace"` and `"errors": []`.
+
+If no Herdr window is running for this home, both commands fail with "no Herdr window …". That is not an
+install error: tell the user to start Herdr, pick **agent-workspace** with `ctrl-shift-l`, and run
+`herdr-app status` once it is open.
 
 ## 7. Report optional tools
 
