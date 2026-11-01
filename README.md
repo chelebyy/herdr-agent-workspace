@@ -6,6 +6,18 @@ A [Herdr](https://herdr.dev) layout for running several coding agents side by si
 
 Source: [github.com/chelebyy/herdr-agent-workspace](https://github.com/chelebyy/herdr-agent-workspace) (repo topic `herdr-layout`, listed at [herdr.dev/layouts](https://herdr.dev/layouts)).
 
+## Screenshots
+
+All screenshots use demo project names; the interface is shown in English (Turkish is the default). The instructions sent to agents and the default team role names stay Turkish by design.
+
+| Task presets: one agent | Task presets: team mode |
+| --- | --- |
+| ![Task presets with a single agent](screenshots/task-presets.png) | ![Task presets in coordinated team mode](screenshots/team-mode.png) |
+
+| Sidebar | Agent resources | Android | Gauges position |
+| --- | --- | --- | --- |
+| ![Sidebar with gauges, quota, spaces, agents and team pulse](screenshots/sidebar.png) | ![Agent resources panel](screenshots/agent-resources.png) | ![Android devices and emulators](screenshots/android.png) | ![Gauges position menu](screenshots/gauges.png) |
+
 ## Features
 
 - **Sidebar (360px):** CPU / RAM / GPU gauges, Claude and Codex quota bars with reset timers and pace markers, Spaces with git branch and ahead/behind, Agents list, team pulse panel, footer with Settings, Add machine and the language switch. Gauges can move to the bottom status bar.
@@ -32,7 +44,7 @@ Manual install:
 2. Copy every folder in `mods/` to `~/.config/herdr-app/mods/`. Do not overwrite a mod with the same name; rename it (the file or folder, the `mod` names in the layout and the mod's own `mods/<name>/` paths) if one is taken.
 3. Run `herdr-app check` for each mod, then switch with the `layout.switch` command (name `agent-workspace`).
 
-`RECIPE.md` and `preview.png` are not copied; `RECIPE.md` is the brief to rebuild the layout from scratch.
+`RECIPE.md`, `preview.png` and `screenshots/` are not copied; `RECIPE.md` is the brief to rebuild the layout from scratch.
 
 ## Requirements
 

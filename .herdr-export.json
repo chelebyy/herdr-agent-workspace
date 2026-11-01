@@ -89,6 +89,12 @@
     "mods/workspace-chrome-tr/x.svg",
     "mods/workspace-status-tr/main.js",
     "mods/workspace-status-tr/mod.json",
-    "preview.png"
+    "preview.png",
+    "screenshots/agent-resources.png",
+    "screenshots/android.png",
+    "screenshots/gauges.png",
+    "screenshots/sidebar.png",
+    "screenshots/task-presets.png",
+    "screenshots/team-mode.png"
   ]
 }
