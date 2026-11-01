@@ -2,6 +2,7 @@
   "files": [
     ".gitignore",
     "I18N.md",
+    "INSTALL.md",
     "LICENSE",
     "LICENSE-Lucide.txt",
     "NOTICE",

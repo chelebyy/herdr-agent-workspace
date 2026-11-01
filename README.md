@@ -34,48 +34,19 @@ All screenshots use demo project names; the interface is shown in English (Turki
 
 ## Install
 
-Copy this into your coding agent (Claude Code, Codex, OpenCode, …) and it installs the layout for you:
+Give your coding agent (Claude Code, Codex, OpenCode, …) this one line:
 
 ```text
-Install the Herdr layout from https://github.com/chelebyy/herdr-agent-workspace.
-
-1. Clone or download the repo to a temporary folder. Read README.md and RECIPE.md first.
-2. Before copying anything, tell me which mods run programs, reach the network or read
-   files outside their own folder (the README's "What it runs" section lists them).
-3. Follow "Layouts and mods other people made" in my Herdr guide
-   (~/.config/herdr-app/AGENTS.md, or $HERDR_APP_HOME/AGENTS.md):
-   - copy layouts/agent-workspace.json into my Herdr layouts/ folder and every folder
-     in mods/ into my Herdr mods/ folder;
-   - never overwrite anything: if a name is taken, rename the new one (its file or
-     folder, the "mod" names in the layout and the mod's own mods/<name>/ paths);
-   - leave README.md, RECIPE.md, preview.png and screenshots/ out.
-4. Run `herdr-app check` on every copied mod and fix nothing silently: report failures.
-5. Switch with `herdr-app do layout.switch --name agent-workspace` and run
-   `herdr-app status` to confirm there are no errors.
-6. Tell me which optional tools are missing on this machine: node, pwsh (Windows),
-   nvidia-smi, adb / Android SDK, quota-axi, and the codex / claude / opencode CLIs.
+Install the Herdr layout from https://github.com/chelebyy/herdr-agent-workspace by following its INSTALL.md.
 ```
 
 Türkçe:
 
 ```text
-https://github.com/chelebyy/herdr-agent-workspace adresindeki Herdr düzenini kur.
-
-1. Depoyu geçici bir klasöre indir. Önce README.md ve RECIPE.md dosyalarını oku.
-2. Bir şey kopyalamadan önce hangi modların program çalıştırdığını, ağa çıktığını ya da
-   kendi klasörü dışındaki dosyaları okuduğunu bana söyle (README'deki "What it runs").
-3. Herdr rehberimdeki (~/.config/herdr-app/AGENTS.md) "Layouts and mods other people made"
-   bölümünü izle: layouts/agent-workspace.json dosyasını Herdr layouts/ klasörüme, mods/
-   altındaki her klasörü Herdr mods/ klasörüme kopyala; hiçbir şeyin üzerine yazma, ad
-   çakışırsa yenisini yeniden adlandır; README, RECIPE, preview.png ve screenshots/ kopyalanmaz.
-4. Kopyalanan her mod için `herdr-app check` çalıştır, hataları bana bildir.
-5. `herdr-app do layout.switch --name agent-workspace` ile geç, `herdr-app status` ile
-   hata olmadığını doğrula.
-6. Bu makinede eksik olan isteğe bağlı araçları söyle: node, pwsh (Windows), nvidia-smi,
-   adb / Android SDK, quota-axi ve codex / claude / opencode CLI'ları.
+https://github.com/chelebyy/herdr-agent-workspace adresindeki Herdr düzenini, oradaki INSTALL.md dosyasını izleyerek kur.
 ```
 
-Your own layout stays as it was: `ctrl-shift-l` switches back, and deleting the files removes this one.
+[INSTALL.md](INSTALL.md) walks the agent through it: it shows you what the mods run before copying, never overwrites your files, checks every mod, switches to the layout and lists the optional tools you are missing. Your own layout stays as it was: `ctrl-shift-l` switches back, and deleting the files removes this one.
 
 Manual install:
 
@@ -83,7 +54,7 @@ Manual install:
 2. Copy every folder in `mods/` to `~/.config/herdr-app/mods/`. Do not overwrite a mod with the same name; rename it (the file or folder, the `mod` names in the layout and the mod's own `mods/<name>/` paths) if one is taken.
 3. Run `herdr-app check` for each mod, then switch with the `layout.switch` command (name `agent-workspace`).
 
-`RECIPE.md`, `preview.png` and `screenshots/` are not copied; `RECIPE.md` is the brief to rebuild the layout from scratch.
+`RECIPE.md`, `INSTALL.md`, `preview.png` and `screenshots/` are not copied; `RECIPE.md` is the brief to rebuild the layout from scratch.
 
 ## Requirements
 
