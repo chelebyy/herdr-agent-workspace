@@ -19,11 +19,12 @@ function locate() {
   }
   const missing = TOOLS.filter(name => !located[name]);
   if (missing.length) {
-    const script = 'for n in ' + missing.join(' ') + '; do printf "\\036%s=%s\\n" "$n" "$(command -v "$n")"; done';
-    const r = spawnSync(process.env.SHELL || '/bin/sh', ['-lic', script], {encoding:'utf8', timeout:10000, stdio:['ignore','pipe','ignore']});
-    for (const line of (r.stdout || '').split('\n')) {
-      const m = /^\x1e(\w+)=(\/.+)$/.exec(line.trim());
-      if (m && missing.includes(m[1]) && runnable(m[2])) located[m[1]] = m[2];
+    // Only `env` is run, so the shell's own syntax (sh, zsh, fish, ...) does not matter; its PATH is searched here.
+    const r = spawnSync(process.env.SHELL || '/bin/sh', ['-lic', 'env'], {encoding:'utf8', timeout:10000, stdio:['ignore','pipe','ignore']});
+    const shellPath = (r.stdout || '').split('\n').filter(line => line.startsWith('PATH=')).pop()?.slice(5) || '';
+    for (const name of missing) for (const dir of shellPath.split(':')) {
+      const file = path.join(dir, name);
+      if (path.isAbsolute(dir) && runnable(file)) { located[name] = file; break; }
     }
   }
   for (const name of TOOLS) located[name] ||= path.join(os.homedir(), '.local/bin', name);

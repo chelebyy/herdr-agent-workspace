@@ -31,8 +31,16 @@ function engines() {
   return clients;
 }
 const start = Date.now(), before = sample(), drm = linux ? engines() : null;
+// Linux: query nvidia-smi only when an NVIDIA display device exists and none is runtime-suspended,
+// because the query would wake a sleeping hybrid-laptop dGPU (RTD3) every 3 s.
+function nvidiaAwake() {
+  let devices;
+  try { devices = fs.readdirSync('/sys/bus/pci/devices'); } catch { return true; }
+  const cards = devices.filter(d => (read(`/sys/bus/pci/devices/${d}/vendor`) || '').trim() === '0x10de' && (read(`/sys/bus/pci/devices/${d}/class`) || '').trim().startsWith('0x03'));
+  return cards.length > 0 && cards.every(d => (read(`/sys/bus/pci/devices/${d}/power/runtime_status`) || '').trim() !== 'suspended');
+}
 // The busiest NVIDIA GPU and its name, as nvidia-smi reports them (no fixed model).
-const nvidia = new Promise(resolve => execFile(process.platform === 'win32' ? 'C:\\Windows\\System32\\nvidia-smi.exe' : 'nvidia-smi', ['--query-gpu=name,utilization.gpu','--format=csv,noheader,nounits'], {timeout:2000,windowsHide:true}, (error,out) => {
+const nvidia = linux && !nvidiaAwake() ? Promise.resolve(null) : new Promise(resolve => execFile(process.platform === 'win32' ? 'C:\\Windows\\System32\\nvidia-smi.exe' : 'nvidia-smi', ['--query-gpu=name,utilization.gpu','--format=csv,noheader,nounits'], {timeout:2000,windowsHide:true}, (error,out) => {
  const rows = error ? [] : out.trim().split(/\r?\n/).map(l => { const at = l.lastIndexOf(','); return {name: l.slice(0, at).trim(), pct: Number(l.slice(at + 1)), src: 'nvidia-smi'}; }).filter(r => r.name && Number.isFinite(r.pct) && r.pct >= 0 && r.pct <= 100);
  resolve(rows.length ? rows.reduce((a, b) => b.pct > a.pct ? b : a) : null);
 }));
