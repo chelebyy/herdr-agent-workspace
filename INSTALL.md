@@ -92,7 +92,7 @@ Notes:
 - If `npm install -g` fails with a permission error, do not use
   `sudo npm`: tell the user and suggest a user-level npm prefix (`npm config set prefix ~/.local/npm` and that
   folder's `bin` on PATH).
-- `quota-axi@0.1.69` is the version this layout was tested with; the quota mod reads its `--json` output.
+- `quota-axi` is a third-party tool, not part of this package: by kunchenguid, [github.com/kunchenguid/quota-axi](https://github.com/kunchenguid/quota-axi), MIT. It reads the agents' usage with their local sign-ins. Say this to the user when asking for consent in step 3. `quota-axi@0.1.69` is the version this layout was tested with; the quota mod reads its `--json` output.
 - The Windows commands match where the team runner looks: Codex and OpenCode under the npm global folder in
   `%APPDATA%`, Claude at `~/.local/bin/claude.exe`. Elsewhere the runner finds the CLIs on PATH or in the login
   shell's PATH.
