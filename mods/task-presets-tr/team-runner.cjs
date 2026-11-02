@@ -3,9 +3,34 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 const crypto = require('node:crypto');
-const {spawn} = require('node:child_process');
+const {spawn, spawnSync} = require('node:child_process');
 
+const TOOLS = ['codex', 'claude', 'opencode'];
+const runnable = file => { try { fs.accessSync(file, fs.constants.X_OK); return fs.statSync(file).isFile(); } catch { return false; } };
+// macOS and Linux: each CLI from an absolute PATH folder. Herdr started from the desktop menu often lacks the
+// folders a shell profile adds (npm prefix, ~/.opencode/bin), so the missing ones are asked from the login shell once.
+let located;
+function locate() {
+  if (located) return located;
+  located = {};
+  for (const name of TOOLS) for (const dir of (process.env.PATH || '').split(path.delimiter)) {
+    const file = path.join(dir, name);
+    if (path.isAbsolute(dir) && runnable(file)) { located[name] = file; break; }
+  }
+  const missing = TOOLS.filter(name => !located[name]);
+  if (missing.length) {
+    const script = 'for n in ' + missing.join(' ') + '; do printf "\\036%s=%s\\n" "$n" "$(command -v "$n")"; done';
+    const r = spawnSync(process.env.SHELL || '/bin/sh', ['-lic', script], {encoding:'utf8', timeout:10000, stdio:['ignore','pipe','ignore']});
+    for (const line of (r.stdout || '').split('\n')) {
+      const m = /^\x1e(\w+)=(\/.+)$/.exec(line.trim());
+      if (m && missing.includes(m[1]) && runnable(m[2])) located[m[1]] = m[2];
+    }
+  }
+  for (const name of TOOLS) located[name] ||= path.join(os.homedir(), '.local/bin', name);
+  return located;
+}
 function commands() {
+  if (process.platform !== 'win32') { const at = locate(); return Object.fromEntries(TOOLS.map(name => [name, [at[name]]])); }
   const npm = path.join(process.env.APPDATA || '', 'npm', 'node_modules');
   return {
     codex: [process.execPath, path.join(npm, '@openai/codex/bin/codex.js')],

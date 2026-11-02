@@ -3,13 +3,17 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os');
 // ANDROID_HOME / ANDROID_SDK_ROOT, else Android Studio's default SDK folder for this platform.
 const sdk=process.env.ANDROID_HOME||process.env.ANDROID_SDK_ROOT||(process.platform==='win32'?path.join(process.env.LOCALAPPDATA||path.join(os.homedir(),'AppData/Local'),'Android/Sdk'):process.platform==='darwin'?path.join(os.homedir(),'Library/Android/sdk'):path.join(os.homedir(),'Android/Sdk'));
 const exe=process.platform==='win32'?'.exe':'';
-const adb=path.join(sdk,'platform-tools/adb'+exe),emu=path.join(sdk,'emulator/emulator'+exe);
-const run=(file,args)=>new Promise((resolve,reject)=>execFile(file,args,{windowsHide:true,timeout:12000,maxBuffer:16*1024*1024},(e,out)=>e?reject(new Error(e.message)):resolve(out.trim())));
+// The SDK's tool when it is there, else the one on PATH (Linux packages such as android-tools put adb in /usr/bin).
+const tool=(rel,name)=>{const file=path.join(sdk,rel+exe);return fs.existsSync(file)?file:name+exe;};
+const adb=tool('platform-tools/adb','adb'),emu=tool('emulator/emulator','emulator');
+// Without the emulator package the panel still lists devices, with no registered emulators.
+const avds=()=>run(emu,['-list-avds']).catch(e=>{if(e.code==='ENOENT')return '';throw e;});
+const run=(file,args)=>new Promise((resolve,reject)=>execFile(file,args,{windowsHide:true,timeout:12000,maxBuffer:16*1024*1024},(e,out)=>e?reject(Object.assign(new Error(e.message),{code:e.code})):resolve(out.trim())));
 async function devices(){const raw=await run(adb,['devices','-l']);return raw.split(/\r?\n/).slice(1).filter(l=>l.trim()).map(l=>{const [serial,state]=l.trim().split(/\s+/);return {serial,state,name:l.match(/model:(\S+)/)?.[1]||serial};});}
 async function main(){
  const [action,arg]=process.argv.slice(2);
  if(action==='list'){
-  const [ds,names]=await Promise.all([devices(),run(emu,['-list-avds'])]);
+  const [ds,names]=await Promise.all([devices(),avds()]);
   for(const d of ds){if(d.state!=='device')continue;
    if(d.serial.startsWith('emulator-'))d.avd=(await run(adb,['-s',d.serial,'emu','avd','name'])).split(/\r?\n/)[0].trim();
    const dump=await run(adb,['-s',d.serial,'shell','dumpsys','activity','activities']).catch(()=>'');

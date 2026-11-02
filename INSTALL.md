@@ -72,14 +72,15 @@ Check which of these exist on this machine and tell the user which features each
 | Tool | Needed for |
 | --- | --- |
 | `node` on PATH | system gauges, Android panel, task presets team mode |
-| `pwsh` (PowerShell 7, Windows) | Agent resources panel |
-| `nvidia-smi` (Windows) | GPU gauge |
-| Android SDK `platform-tools` / `emulator` (`ANDROID_HOME`) | Android panel |
+| `pwsh` (PowerShell 7, Windows only) | Agent resources panel on Windows (Linux uses `node` and `/proc`) |
+| `nvidia-smi` | GPU gauge for NVIDIA cards (Linux reads AMD and Intel GPUs without it) |
+| a system monitor (Linux: `plasma-systemmonitor`, `gnome-system-monitor`, …) | clicking the gauges |
+| `adb` (Android SDK `platform-tools` or on PATH), SDK `emulator` (`ANDROID_HOME`) | Android panel (devices need `adb`, emulators need `emulator`) |
 | `quota-axi` | quota bars |
 | `codex`, `claude`, `opencode` CLIs | task presets (single agent uses Herdr's installed agents; team mode uses these) |
 
-On macOS and Linux the system gauges, Agent resources panel and team mode do not work yet; everything else
-should. Say so if the machine is not Windows.
+Everything works on Windows and Linux. On macOS the GPU gauge and the Agent resources panel are not supported
+yet and the rest is untested; say so if the machine is a Mac.
 
 ## Language
 

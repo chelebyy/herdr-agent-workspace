@@ -1,6 +1,6 @@
 import { View, div } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
-import { agents, theme, run, exec, hc, appHome, props, layout, shared } from "herdr";
+import { agents, theme, run, exec, hc, appHome, props, layout, shared, window } from "herdr";
 // UI language (shared "ui.lang": "tr" default | "en"); see I18N.md (package root)
 const tx = (tr, en) => (shared("ui.lang") === "en" ? en : tr);
 
@@ -88,7 +88,12 @@ export default class Resources extends View {
         if (!visible(layout(), "agent-resources-panel")) return;
         const roots = resolved.map(term => term.pid);
         if (!roots.length) throw new Error(tx("Yerel terminal süreçleri bulunamadı.", "No local terminal processes found."));
-        const result = await exec("pwsh", ["-NoLogo", "-NoProfile", "-NonInteractive", "-File", `${appHome()}/mods/agent-resources-tr/sample.ps1`, "-RootIds", [...new Set(roots)].join(",")]);
+        const ids = [...new Set(roots)].join(","), platform = window()?.platform;
+        if (platform === "macos") throw new Error(tx("macOS'ta kaynak ölçümü henüz desteklenmiyor.", "Resource measurement is not supported on macOS yet."));
+        // Windows: PowerShell 7 and the CIM process table; Linux: Node reading /proc.
+        const result = platform === "windows"
+          ? await exec("pwsh", ["-NoLogo", "-NoProfile", "-NonInteractive", "-File", `${appHome()}/mods/agent-resources-tr/sample.ps1`, "-RootIds", ids])
+          : await exec("node", [`${appHome()}/mods/agent-resources-tr/sample.cjs`, ids]);
         if (result.code !== 0) throw new Error(tx("Süreç ölçümü alınamadı.", "Process measurement failed."));
         const next = JSON.parse(result.stdout);
         if (!Array.isArray(next.processes) || !Number.isFinite(next.at) || !(next.cores > 0)) throw new Error(tx("Ölçüm biçimi geçersiz.", "Invalid measurement format."));
