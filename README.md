@@ -59,7 +59,7 @@ Manual install:
 ## Requirements
 
 - Herdr with layouts and mods support.
-- **`node` on your PATH.** Several mods run Node helper scripts (system gauges, Android panel, team mode).
+- **`node` 22.19 or newer on your PATH.** Several mods run Node helper scripts (system gauges, Android panel, team mode).
 - **Platform-specific parts:**
   - *System gauges* (`system-windows`, the name is historical): CPU and RAM everywhere. GPU from `nvidia-smi` (Windows: `C:\Windows\System32`, elsewhere on PATH; on Linux only while no NVIDIA card is runtime-suspended, so a sleeping laptop dGPU is not woken); on Linux without it, AMD's `gpu_busy_percent` in sysfs, else the DRM engine counters in `/proc/<pid>/fdinfo` (Intel i915/xe, AMD, others; the busiest engine, counted over your own processes, so the compositor may be left out). Clicking opens Task Manager (Windows), Activity Monitor (macOS) or the first installed of `plasma-systemmonitor`, `gnome-system-monitor`, `mate-system-monitor`, `xfce4-taskmanager`, `lxtask` (Linux, started detached with `setsid -f`).
   - *Agent resources panel:* PowerShell 7 (`pwsh`) on Windows; on Linux a Node script reads `/proc`. Not supported on macOS yet.
