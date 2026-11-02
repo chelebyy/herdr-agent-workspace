@@ -117,23 +117,33 @@ start folders, rules) come from a separate mod, [jankeesvw/herdr-space-folders](
 It is a third-party project with no license file, so it is not part of this package: install it from its own
 repository on this machine only, and tell the user that. Its interface is English.
 
-1. Clone it into a folder of the user's choice (for example next to this package):
-   `git clone https://github.com/jankeesvw/herdr-space-folders.git`. This layout was tested with commit
-   `cb83ff4`; if the newest commit differs, say so.
-2. Read `mods/space-folders/main.js` before copying and tell the user in a line what it runs. At `cb83ff4`
-   that is `sh` reading and writing its own file `~/.config/herdr-space-folders.json` on each machine,
-   `git status` / `git rev-parse` in the spaces' folders and `hc machine ls`; no network. Stop and ask if it
-   runs anything else.
+It keeps its folders by running POSIX `sh` (`cat`, `mkdir`, `mv` on `~/.config/herdr-space-folders.json`), and
+its path rules expand `~` only for Unix homes. On Windows, check first that `sh` is on PATH
+(`Get-Command sh`, usually from Git for Windows); without it, folders are not saved and are gone after a
+restart, so tell the user and skip this step unless they still want it. Path rules written with Windows paths
+do not match.
+
+1. Clone it into a folder of the user's choice (for example next to this package) and check out the tested
+   commit: `git clone https://github.com/jankeesvw/herdr-space-folders.git <folder>` then
+   `git -C <folder> checkout cb83ff4aeed32b674fb8fe66b183ae60fe8944f6`. Install a newer commit only if the
+   user asks for it after you have shown them `git -C <folder> diff cb83ff4aeed32b674fb8fe66b183ae60fe8944f6..origin/HEAD -- mods/`
+   and they agree.
+2. Read every file in `mods/space-folders` before copying and tell the user in a line what it runs. At the
+   tested commit that is `sh` reading and writing its own file `~/.config/herdr-space-folders.json` (and
+   printing `$HOME`) on each machine its spaces run on, `git status` / `git rev-parse` in the spaces' folders
+   and `hc machine ls`; no network. Stop and ask if it runs or contacts anything else.
 3. Copy (do not symlink: Herdr does not notice changes inside a linked mod folder) `mods/space-folders` to
    `<Herdr home>/mods/space-folders`, unless that folder exists (then ask). Run
    `herdr-app check "<Herdr home>/mods/space-folders"`.
-4. In `<Herdr home>/layouts/agent-workspace.json`, change the spaces block's `"mod": "spaces-tr"` to
-   `"mod": "space-folders"` (keep a copy of the file first), then `herdr-app do layout.switch --name agent-workspace`
+4. In the installed layout from step 4 (`<Herdr home>/layouts/agent-workspace.json`, or the name chosen there),
+   keep a copy of the file, then change the spaces block (`"id": "spaces"`) from `"mod": "spaces-tr"` (or the
+   name chosen in step 4) to `"mod": "space-folders"`. Then `herdr-app do layout.switch --name <that layout>`
    and check `herdr-app status` for errors.
 
 Tell the user: folders are kept per machine, so folders made on another computer do not appear here; the
-folder button next to "+" makes one, right-click edits it. To update later: `git pull` in the clone and copy
-the mod folder again. To undo: set the block back to `spaces-tr`. Reinstalling this package's layout also puts
+folder button next to "+" makes one, right-click edits it. To update later: fetch in the clone, show the user
+the diff of `mods/space-folders`, and copy the newer folder only after they agree. To undo: put the layout copy
+back (or set the spaces block back to the original mod). Reinstalling this package's layout also puts
 `spaces-tr` back.
 
 ## Language
