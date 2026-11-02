@@ -76,7 +76,7 @@ instead of trying other sources.
 
 | Tool | Needed for | Windows | macOS | Linux |
 | --- | --- | --- | --- | --- |
-| `node` (with `npm`) | system gauges, Android, team mode, and installing the npm tools below | `winget install OpenJS.NodeJS.LTS` | `brew install node` | distro package: `sudo pacman -S nodejs npm`, `sudo apt install nodejs npm`, `sudo dnf install nodejs` |
+| `node` 22.19 or newer (with `npm`) | system gauges, Android, team mode, and installing the npm tools below | `winget install OpenJS.NodeJS.LTS` | `brew install node` | distro package: `sudo pacman -S nodejs npm`, `sudo apt install nodejs npm`, `sudo dnf install nodejs` |
 | `quota-axi` | quota bars | `npm install -g quota-axi@0.1.69` | same | same |
 | `pwsh` (PowerShell 7) | Agent resources panel (Windows only; Linux uses `node` and `/proc`) | `winget install Microsoft.PowerShell` | not needed | not needed |
 | `adb` | Android panel (devices) | `winget install Google.PlatformTools` | `brew install android-platform-tools` | `sudo pacman -S android-tools`, `sudo apt install adb`, `sudo dnf install android-tools` |
@@ -85,7 +85,11 @@ instead of trying other sources.
 | `opencode` CLI | team mode | `npm install -g @opencode/cli` | same | same |
 
 Notes:
-- Install `node` first; the npm rows need it. If `npm install -g` fails with a permission error, do not use
+- Install `node` first; the npm rows need it. Then check `node --version`: `quota-axi` needs 22.19 or newer
+  (npm only warns with `EBADENGINE` and installs it anyway). Distro packages are often older (Ubuntu 22.04 and
+  24.04, Debian 12); if the version is too old, do not install the npm tools on it: tell the user and suggest
+  a current Node (NodeSource packages, or a version manager such as `fnm` or `nvm`).
+- If `npm install -g` fails with a permission error, do not use
   `sudo npm`: tell the user and suggest a user-level npm prefix (`npm config set prefix ~/.local/npm` and that
   folder's `bin` on PATH).
 - `quota-axi@0.1.69` is the version this layout was tested with; the quota mod reads its `--json` output.
