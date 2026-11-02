@@ -21,11 +21,13 @@ function level(pct) {
 }
 
 
-// Clicking the gauges opens the system's process monitor: the first of these that starts.
+// Clicking the gauges opens the system's process monitor. On Linux the first installed one is started detached
+// (setsid -f), so exec returns at once and its time limit cannot end the monitor.
+const LINUX_MONITOR = 'for m in plasma-systemmonitor gnome-system-monitor mate-system-monitor xfce4-taskmanager lxtask; do if command -v "$m" >/dev/null 2>&1; then setsid -f "$m" >/dev/null 2>&1 </dev/null; exit 0; fi; done; exit 1';
 const MONITORS = {
   windows: [["C:\\Windows\\System32\\Taskmgr.exe", []]],
   macos: [["open", ["-a", "Activity Monitor"]]],
-  linux: [["plasma-systemmonitor", []], ["gnome-system-monitor", []], ["mate-system-monitor", []], ["xfce4-taskmanager", []], ["lxtask", []]],
+  linux: [["sh", ["-c", LINUX_MONITOR]]],
 };
 async function openMonitor() {
   for (const [command, args] of MONITORS[window()?.platform] ?? []) {
