@@ -97,6 +97,7 @@
     "screenshots/gauges.png",
     "screenshots/sidebar.png",
     "screenshots/task-presets.png",
-    "screenshots/team-mode.png"
+    "screenshots/team-mode.png",
+    "team-tests.cjs"
   ]
 }
