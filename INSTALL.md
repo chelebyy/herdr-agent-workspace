@@ -30,7 +30,8 @@ Summarise the README's **What it runs** section for the user in a few lines: whi
 (`node`, `pwsh`, `powershell`, `git`, `adb`, `quota-axi`, the agent CLIs), that team mode sends task text to
 the chosen AI providers, and which files are written outside the mods' own folders. Also check now which tools
 from step 7 are missing and list the ones you will install. Continue only when the user agrees; that answer
-covers the installs in step 7 (the user may leave some out).
+covers the installs in step 7 (the user may leave some out). Also ask whether they want folders in the
+spaces list (step 8); install that only on a yes.
 
 ## 4. Copy without overwriting
 
@@ -109,6 +110,32 @@ Then report which tools are present, which you installed and which are still mis
 one turns off. Everything works on Windows and Linux. On macOS the GPU gauge and the Agent resources panel are
 not supported yet and the rest is untested; say so if the machine is a Mac.
 
+## 8. Optional: folders in the spaces list
+
+Only if the user said yes in step 3. Folders that group spaces (a folder button next to "+", drag and drop,
+start folders, rules) come from a separate mod, [jankeesvw/herdr-space-folders](https://github.com/jankeesvw/herdr-space-folders).
+It is a third-party project with no license file, so it is not part of this package: install it from its own
+repository on this machine only, and tell the user that. Its interface is English.
+
+1. Clone it into a folder of the user's choice (for example next to this package):
+   `git clone https://github.com/jankeesvw/herdr-space-folders.git`. This layout was tested with commit
+   `cb83ff4`; if the newest commit differs, say so.
+2. Read `mods/space-folders/main.js` before copying and tell the user in a line what it runs. At `cb83ff4`
+   that is `sh` reading and writing its own file `~/.config/herdr-space-folders.json` on each machine,
+   `git status` / `git rev-parse` in the spaces' folders and `hc machine ls`; no network. Stop and ask if it
+   runs anything else.
+3. Copy (do not symlink: Herdr does not notice changes inside a linked mod folder) `mods/space-folders` to
+   `<Herdr home>/mods/space-folders`, unless that folder exists (then ask). Run
+   `herdr-app check "<Herdr home>/mods/space-folders"`.
+4. In `<Herdr home>/layouts/agent-workspace.json`, change the spaces block's `"mod": "spaces-tr"` to
+   `"mod": "space-folders"` (keep a copy of the file first), then `herdr-app do layout.switch --name agent-workspace`
+   and check `herdr-app status` for errors.
+
+Tell the user: folders are kept per machine, so folders made on another computer do not appear here; the
+folder button next to "+" makes one, right-click edits it. To update later: `git pull` in the clone and copy
+the mod folder again. To undo: set the block back to `spaces-tr`. Reinstalling this package's layout also puts
+`spaces-tr` back.
+
 ## Language
 
 The interface starts in Turkish. The user can switch to English with **TR | EN** at the bottom left of the
@@ -117,4 +144,4 @@ sidebar (the choice is remembered).
 ## Undo
 
 The user's own layout is untouched: `ctrl-shift-l` switches back. To remove this layout, delete
-`<Herdr home>/layouts/agent-workspace.json` and the copied mod folders.
+`<Herdr home>/layouts/agent-workspace.json` and the copied mod folders (and `mods/space-folders` if step 8 added it).
