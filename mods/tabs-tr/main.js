@@ -5,6 +5,8 @@ import { spaces, panes, run, openOverlay, theme, window, shared, layout, setting
 
 // UI language (shared "ui.lang": "tr" default | "en"); see I18N.md (package root)
 const tx = (tr, en) => (shared("ui.lang") === "en" ? en : tr);
+// A working agent shows a still green light (same green in the agents list, tabs and status bar).
+const WORKING_GREEN = "#22c55e";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -71,8 +73,8 @@ export default class Tabs extends View {
         .on_mouse_down("right", (_e, cx) => { cx.stop_propagation(); openOverlay({ mod: "menu-tr", kind: "popup", width: 200, props: { tab: "tab", target: { id: c.id, space: space.id } } }); })
         .when(Boolean(program?.icon), el => el.child(program.tint ? svg(program.icon).size(14).text_color(t.muted) : image(program.icon).size(14)))
         .child(div().max_w(170).truncate().child(c.zoomed ? `${name} Z` : name))
-        // Held still on purpose: a spinning icon redraws the whole window every frame while an agent works.
-        .when(c.status === "working", el => el.child(svg("mods/workspace-chrome/spinner.svg").size(12).flex_none().text_color(t.working)))
+        // Working: a still green light (no animation: a moving icon redraws the whole window every frame).
+        .when(c.status === "working", el => el.child(div().size(6).rounded(3).bg(WORKING_GREEN)))
         .when(c.status === "blocked" || c.status === "done", el => el.child(div().size(6).rounded(3).bg(t[c.status])))
         .when(c.active, el => el.child(div().id(`close-${c.id}`).text_color(t.dim).on_mouse_down("left", stop).on_click((_e, cx) => { cx.stop_propagation(); run("tab.close", { id: c.id }); }).child(svg("mods/pane/close.svg").size(12))));
     };
