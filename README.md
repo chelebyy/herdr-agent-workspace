@@ -46,7 +46,7 @@ Türkçe:
 https://github.com/chelebyy/herdr-agent-workspace adresindeki Herdr düzenini, oradaki INSTALL.md dosyasını izleyerek kur.
 ```
 
-[INSTALL.md](INSTALL.md) walks the agent through it: it shows you what the mods run before copying, never overwrites your files, checks every mod, switches to the layout and lists the optional tools you are missing. Your own layout stays as it was: `ctrl-shift-l` switches back, and deleting the files removes this one.
+[INSTALL.md](INSTALL.md) walks the agent through it: it shows you what the mods run before copying, never overwrites your files, checks every mod, switches to the layout and installs the missing tools you agree to (`quota-axi`, `adb`, the agent CLIs, …). Your own layout stays as it was: `ctrl-shift-l` switches back, and deleting the files removes this one.
 
 Manual install:
 

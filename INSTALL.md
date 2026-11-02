@@ -28,8 +28,9 @@ Read `README.md` and `RECIPE.md` there before copying anything.
 
 Summarise the README's **What it runs** section for the user in a few lines: which mods start programs
 (`node`, `pwsh`, `powershell`, `git`, `adb`, `quota-axi`, the agent CLIs), that team mode sends task text to
-the chosen AI providers, and which files are written outside the mods' own folders. Continue only when the
-user agrees.
+the chosen AI providers, and which files are written outside the mods' own folders. Also check now which tools
+from step 7 are missing and list the ones you will install. Continue only when the user agrees; that answer
+covers the installs in step 7 (the user may leave some out).
 
 ## 4. Copy without overwriting
 
@@ -61,25 +62,46 @@ herdr-app status
 
 `status` must show `"layout": "agent-workspace"` and `"errors": []`.
 
-If no Herdr window is running for this home, both commands fail with "no Herdr window …". That is not an
-install error: tell the user to start Herdr, pick **agent-workspace** with `ctrl-shift-l`, and run
-`herdr-app status` once it is open.
+If no Herdr window is running for this home, both commands fail with "no Herdr wi## 7. Install the missing tools
 
-## 7. Report optional tools
+Check which of these exist (on PATH, or where the note says). Install the missing ones the user agreed to in
+step 3, using the command for this platform. Run user-level installs yourself. A command that needs `sudo` or
+an administrator prompt: run it if you can; if you cannot (no terminal for the password), give the user the
+exact command to run and wait. Never install anything the user left out, and stop on a failed install
+instead of trying other sources.
 
-Check which of these exist on this machine and tell the user which features each missing one turns off:
+| Tool | Needed for | Windows | macOS | Linux |
+| --- | --- | --- | --- | --- |
+| `node` (with `npm`) | system gauges, Android, team mode, and installing the npm tools below | `winget install OpenJS.NodeJS.LTS` | `brew install node` | distro package: `sudo pacman -S nodejs npm`, `sudo apt install nodejs npm`, `sudo dnf install nodejs` |
+| `quota-axi` | quota bars | `npm install -g quota-axi@0.1.69` | same | same |
+| `pwsh` (PowerShell 7) | Agent resources panel (Windows only; Linux uses `node` and `/proc`) | `winget install Microsoft.PowerShell` | not needed | not needed |
+| `adb` | Android panel (devices) | `winget install Google.PlatformTools` | `brew install android-platform-tools` | `sudo pacman -S android-tools`, `sudo apt install adb`, `sudo dnf install android-tools` |
+| `codex` CLI | team mode | `npm install -g @openai/codex` | same | same |
+| `claude` CLI | team mode | `irm https://claude.ai/install.ps1 \| iex` (PowerShell) | `curl -fsSL https://claude.ai/install.sh \| bash` | same as macOS |
+| `opencode` CLI | team mode | `npm install -g @opencode/cli` | same | same |
 
-| Tool | Needed for |
-| --- | --- |
-| `node` on PATH | system gauges, Android panel, task presets team mode |
-| `pwsh` (PowerShell 7, Windows only) | Agent resources panel on Windows (Linux uses `node` and `/proc`) |
-| `nvidia-smi` | GPU gauge for NVIDIA cards (Linux reads AMD and Intel GPUs without it) |
-| a system monitor (Linux: `plasma-systemmonitor`, `gnome-system-monitor`, …) | clicking the gauges |
-| `adb` (Android SDK `platform-tools` or on PATH), SDK `emulator` (`ANDROID_HOME`) | Android panel (devices need `adb`, emulators need `emulator`) |
-| `quota-axi` | quota bars |
-| `codex`, `claude`, `opencode` CLIs | task presets (single agent uses Herdr's installed agents; team mode uses these) |
+Notes:
+- Install `node` first; the npm rows need it. If `npm install -g` fails with a permission error, do not use
+  `sudo npm`: tell the user and suggest a user-level npm prefix (`npm config set prefix ~/.local/npm` and that
+  folder's `bin` on PATH).
+- `quota-axi@0.1.69` is the version this layout was tested with; the quota mod reads its `--json` output.
+- The Windows commands match where the team runner looks: Codex and OpenCode under the npm global folder in
+  `%APPDATA%`, Claude at `~/.local/bin/claude.exe`. Elsewhere the runner finds the CLIs on PATH or in the login
+  shell's PATH.
+- Only offer the agent CLIs the user wants to use in team mode; each needs the user's own account. After
+  installing, tell the user to sign in once: `codex login`, `claude` (then `/login`), `opencode auth login`.
+- Not installed by this step (tell the user what each one turns off if it is missing): `nvidia-smi` (comes
+  with the NVIDIA driver; GPU gauge on NVIDIA cards, while Linux reads AMD and Intel GPUs without it), the
+  Android `emulator` (Android Studio's SDK Manager; emulators in the Android panel), and a Linux system monitor
+  such as `plasma-systemmonitor` or `gnome-system-monitor` (clicking the gauges).
+- If the Herdr window was already open, a tool installed into a new PATH folder may only be found after Herdr
+  restarts; the quota mod and team runner also look in the login shell's PATH.
 
-Everything works on Windows and Linux. On macOS the GPU gauge and the Agent resources panel are not supported
+Then report which tools are present, which you installed and which are still missing, and what each missing
+one turns off. Everything works on Windows and Linux. On macOS the GPU gauge and the Agent resources panel are
+not supported yet and the rest is untested; say so if the machine is a Mac.
+
+rks on Windows and Linux. On macOS the GPU gauge and the Agent resources panel are not supported
 yet and the rest is untested; say so if the machine is a Mac.
 
 ## Language
