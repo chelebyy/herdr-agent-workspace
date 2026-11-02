@@ -11,6 +11,7 @@
     "layouts/agent-workspace.json",
     "mods/agent-resources-tr/main.js",
     "mods/agent-resources-tr/mod.json",
+    "mods/agent-resources-tr/sample.cjs",
     "mods/agent-resources-tr/sample.ps1",
     "mods/agents-tr/main.js",
     "mods/agents-tr/mod.json",

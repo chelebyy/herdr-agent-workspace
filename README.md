@@ -2,7 +2,7 @@
 
 A [Herdr](https://herdr.dev) layout for running several coding agents side by side: one sidebar with system and quota gauges, projects, agents sorted by who needs you, and an animated team pulse; a tab bar with launchers for Files, Agent resources, Android and ready-made agent tasks; and a status bar that counts agents by state. The interface is Turkish by default with a TR | EN switch.
 
-**Platforms:** built and tested on Windows. On macOS and Linux the layout, menus, lists, Files, quota and Android panels should work but have not been tested; the system gauges, the Agent resources panel and team mode are Windows-only for now (see Requirements).
+**Platforms:** built on Windows and tested on Windows and Linux (CachyOS, KDE Plasma). Every part works on both. On macOS the layout, menus, lists, Files, quota, Android, the CPU/RAM gauges and team mode should work but have not been tested; the GPU gauge and the Agent resources panel are not supported there yet (see Requirements).
 
 ![Agent Workspace](preview.png)
 
@@ -26,7 +26,7 @@ All screenshots use demo project names; the interface is shown in English (Turki
 - **Agents list:** sorted by priority (Needs you, Done, Working, Idle) or grouped by space; pinning; sub-agent trees; time since last change.
 - **Status bar:** machine, git branch and agent counts by state, plus the command-palette key.
 - **Task presets:** a dialog that starts "Investigate a bug", "Review changes" or "Run tests" in a new tab with one installed agent, or with a small Codex / Claude / OpenCode team (coordinated or parallel review).
-- **Agent resources panel:** CPU, RAM and process count per local agent terminal (Windows).
+- **Agent resources panel:** CPU, RAM and process count per local agent terminal (Windows and Linux).
 - **Android panel:** connected devices and emulators, start an emulator, take screenshots.
 - **Files panel:** lazy file tree of the focused pane's folder with git marks and a read-only preview.
 - **Team pulse:** four animated status diagrams (default "Mini control center") for open agents by kind. Decoration only, not a performance measurement.
@@ -60,10 +60,13 @@ Manual install:
 
 - Herdr with layouts and mods support.
 - **`node` on your PATH.** Several mods run Node helper scripts (system gauges, Android panel, team mode).
-- **Windows-only parts:** the system gauges (`system-windows` reads the GPU through `nvidia-smi` and opens Task Manager on click), the Agent resources panel (needs PowerShell 7, `pwsh`), the Files panel's folder listing (PowerShell on Windows, `sh` elsewhere), and the team runner's default tool locations. On other systems those parts show a dash or an error; the rest of the layout works.
-- **Android panel:** Android SDK platform-tools (`adb`) and, for emulators, the SDK `emulator`, found through `ANDROID_HOME` / `ANDROID_SDK_ROOT` or the default Android Studio SDK folder.
+- **Platform-specific parts:**
+  - *System gauges* (`system-windows`, the name is historical): CPU and RAM everywhere. GPU from `nvidia-smi` (Windows: `C:\Windows\System32`, elsewhere on PATH); on Linux without it, AMD's `gpu_busy_percent` in sysfs, else the DRM engine counters in `/proc/<pid>/fdinfo` (Intel i915/xe, AMD, others; the busiest engine, counted over your own processes, so the compositor may be left out). Clicking opens Task Manager (Windows), Activity Monitor (macOS) or the first of `plasma-systemmonitor`, `gnome-system-monitor`, `mate-system-monitor`, `xfce4-taskmanager`, `lxtask` (Linux).
+  - *Agent resources panel:* PowerShell 7 (`pwsh`) on Windows; on Linux a Node script reads `/proc`. Not supported on macOS yet.
+  - *Files panel's folder listing:* PowerShell on Windows, `sh` elsewhere.
+- **Android panel:** Android SDK platform-tools (`adb`) and, for emulators, the SDK `emulator`, found through `ANDROID_HOME` / `ANDROID_SDK_ROOT` or the default Android Studio SDK folder, else on PATH (for example `adb` from a Linux `android-tools` package). Without `emulator` the panel still lists devices.
 - **Quota bars:** the `quota-axi` CLI. Without it the quota block shows an error.
-- **Team mode in Task presets:** installed Codex, Claude and/or OpenCode CLIs, found at fixed locations (Codex and OpenCode under the npm global folder in `%APPDATA%`, Claude at `~/.local/bin/claude.exe`). It sends your task text to those providers and uses your accounts' quotas. Run logs are kept under `<Herdr home>/data/team-runs/`.
+- **Team mode in Task presets:** installed Codex, Claude and/or OpenCode CLIs, found at fixed locations on Windows (Codex and OpenCode under the npm global folder in `%APPDATA%`, Claude at `~/.local/bin/claude.exe`) and on PATH elsewhere; tools missing from Herdr's PATH (common when Herdr starts from the desktop menu) are looked up once through your login shell (`$SHELL -lic 'command -v ...'`). It sends your task text to those providers and uses your accounts' quotas. Run logs are kept under `<Herdr home>/data/team-runs/`.
 - Single-agent presets need at least one agent Herdr recognizes as installed.
 
 ## What it runs
@@ -79,9 +82,9 @@ Read this before installing. Listed from the code of each mod.
 
 | Mod | Runs |
 | --- | --- |
-| `system-windows` | `node` (its `sample.cjs`, every 3 s while visible), which runs `C:\Windows\System32\nvidia-smi.exe`; `C:\Windows\System32\Taskmgr.exe` when you click the gauges |
+| `system-windows` | `node` (its `sample.cjs`, every 3 s while visible), which runs `nvidia-smi` (`C:\Windows\System32\nvidia-smi.exe` on Windows) and on Linux reads `/sys/class/drm` and `/proc/<pid>/fdinfo`; the system process monitor when you click the gauges (`Taskmgr.exe`, Activity Monitor, or a Linux monitor such as `plasma-systemmonitor`) |
 | `quota` | `node` on the global `quota-axi` script (Windows), `quota-axi`, then `cmd.exe /d /s /c quota-axi ...` (Windows) or your login shell `-lic` (elsewhere); every 60 s while visible |
-| `agent-resources-tr` | `hc get <address> --json` for each local agent, then `pwsh -File sample.ps1`, which reads the Windows process table (CIM `Win32_Process`); every 15 s while the panel is open |
+| `agent-resources-tr` | `hc get <address> --json` for each local agent, then `pwsh -File sample.ps1`, which reads the Windows process table (CIM `Win32_Process`), or on Linux `node sample.cjs`, which reads `/proc/<pid>/stat` and runs `getconf`; every 15 s while the panel is open |
 | `android-devices` | `node android.cjs`, which runs `adb devices -l`, `adb shell dumpsys activity activities`, `adb emu avd name`, `adb exec-out screencap -p`, `emulator -list-avds`, `emulator -avd <name>`; every 5 s while the panel is open |
 | `task-presets-tr` | `node team-runner.cjs catalog` (runs `codex debug models`, `claude --help`, `opencode api model.list`) and `node team-runner.cjs run <file>` (runs the chosen CLIs with read-only / plan settings); a normal task starts the agent you picked in a new tab with the task text; opens the system folder picker |
 | `files-tr` | `powershell` (Windows, local) or `sh` to list folders; `git rev-parse`, `git status` in the focused pane's folder |
@@ -93,7 +96,8 @@ The other mods (`workspace-chrome-tr`, `workspace-status-tr`, `agents-tr`, `tabs
 **Files read outside a mod's own folder:**
 - `files-tr` lists the focused pane's folder (also on remote machines) and reads the text of files you click, and watches that folder for changes.
 - `spaces-tr` and `menu-tr` read git state of your spaces' folders; `spaces-tr` also watches those repositories.
-- `task-presets-tr` / `team-runner.cjs` read the folder you pick (through the CLIs) and the request file they wrote.
+- `task-presets-tr` / `team-runner.cjs` read the folder you pick (through the CLIs) and the request file they wrote; outside Windows it may start your login shell once to find the CLIs.
+- `system-windows` (Linux) reads GPU counters from `/sys/class/drm` and the DRM entries in `/proc/<pid>/fdinfo` of your processes.
 - `agent-resources-tr` reads the process list of the machine (CPU time, memory, parent ids) and keeps the ones belonging to your agents' terminals.
 - `android-devices` reads the SDK folder and what `adb` reports (including the foreground app of each device).
 

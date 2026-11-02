@@ -5,10 +5,10 @@ function monitorVisible(node, id) {
   return (node.children ?? []).some(child => monitorVisible(child, id));
 }
 // CPU, memory and GPU load in the status bar: a small live graph and a percent for each.
-// Windows: Node OS counters and NVIDIA utilization, no elevation required.
+// Node OS counters; GPU from nvidia-smi, else (Linux) AMD sysfs or the DRM fdinfo engine counters. No elevation required.
 import { View, div } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { exec, theme, settings, props, layout, shared, setShared, appHome } from "herdr";
+import { exec, theme, settings, props, layout, shared, setShared, appHome, window } from "herdr";
 // UI language (shared "ui.lang": "tr" default | "en"); see I18N.md (package root)
 const tx = (tr, en) => (shared("ui.lang") === "en" ? en : tr);
 
@@ -20,6 +20,19 @@ function level(pct) {
   return scale[pct >= 92 ? 3 : pct >= 80 ? 2 : pct >= 60 ? 1 : 0];
 }
 
+
+// Clicking the gauges opens the system's process monitor: the first of these that starts.
+const MONITORS = {
+  windows: [["C:\\Windows\\System32\\Taskmgr.exe", []]],
+  macos: [["open", ["-a", "Activity Monitor"]]],
+  linux: [["plasma-systemmonitor", []], ["gnome-system-monitor", []], ["mate-system-monitor", []], ["xfce4-taskmanager", []], ["lxtask", []]],
+};
+async function openMonitor() {
+  for (const [command, args] of MONITORS[window()?.platform] ?? []) {
+    try { await exec(command, args); return; } catch { /* not installed, try the next one */ }
+  }
+}
+const GPU_SOURCE = { "nvidia-smi": ["nvidia-smi", "nvidia-smi"], sysfs: ["sysfs", "sysfs"], fdinfo: ["DRM fdinfo, en yoğun motor", "DRM fdinfo, busiest engine"] };
 
 async function read() {
   const r = await exec("node", [`${appHome()}/mods/system-windows/sample.cjs`]);
@@ -67,14 +80,14 @@ export default class System extends View {
     const metric = (key, label) => {
       const m = now?.[key];
       if (this.error) return div().text_color(t.dim).tooltip(this.error).child(`${label} –`);
-      return h_flex().id(`sys-${key}`).gap(5).items_center().flex_none().tooltip(m?.tip ? tx(m.name ? `${m.name} kullanımı (nvidia-smi)` : TIPS[m.tip] ?? m.tip, m.tip) : label)
+      return h_flex().id(`sys-${key}`).gap(5).items_center().flex_none().tooltip(m?.tip ? tx(m.name ? `${m.name} kullanımı (${GPU_SOURCE[m.src ?? "nvidia-smi"]?.[0] ?? m.src})` : TIPS[m.tip] ?? m.tip, m.tip) : label)
         .child(div().text_size(10).text_color(t.dim).child(label))
         .child(graph(this.history[key], t))
         .child(div().min_w(26).text_size(11).text_color(m && m.pct >= 60 ? level(m.pct) : t.muted).child(m ? `${Math.round(m.pct)}%` : "–"));
     };
     return h_flex().id("system").size_full().px(12).gap(12).items_center().justify_end().when(Boolean(props()?.sidebar), el => el.justify_between()).overflow_hidden()
       .bg(t.chrome).border_t(1).border_color(t.border).text_size(11.5).text_color(t.muted).cursor_pointer()
-      .on_click(() => exec("C:\\Windows\\System32\\Taskmgr.exe", []).catch(() => {}))
+      .on_click(() => { openMonitor(); })
       .when(Boolean(this.error) && !now, el => el.child(div().text_color(t.dim).tooltip(this.error).child(tx("Sistem yükü okunamıyor", "System load unavailable"))))
       .when(!this.error || Boolean(now), el => el.children([metric("cpu", "CPU"), metric("ram", "RAM"), metric("gpu", "GPU")].filter(Boolean)))
       .when(!props()?.sidebar, el => el.child(div().w(1).h(12).ml(2).flex_none().bg(t.border)));
