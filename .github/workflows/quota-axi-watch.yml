@@ -1,0 +1,81 @@
+# Weekly check of the third-party quota-axi CLI that the quota mod runs (pinned in INSTALL.md).
+# Opens one issue per new upstream release, and one if upstream has stopped releasing.
+# Uses only the runner's own node, npm and gh; upstream data is validated and never executed.
+name: quota-axi watch
+
+on:
+  schedule:
+    - cron: '17 6 * * 1' # Mondays 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: quota-axi-watch
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Compare the pinned quota-axi with npm
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          STALE_DAYS: '120'
+        run: |
+          set -euo pipefail
+          semver='^[0-9]+\.[0-9]+\.[0-9]+$'
+
+          # Every quota-axi@X.Y.Z in INSTALL.md must name the same version.
+          pins=$(gh api "repos/$GH_REPO/contents/INSTALL.md?ref=$GITHUB_SHA" -H 'Accept: application/vnd.github.raw' \
+            | grep -oE 'quota-axi@[0-9]+\.[0-9]+\.[0-9]+' | sed 's/^quota-axi@//' | sort -u || true)
+          if [ "$(printf '%s\n' "$pins" | grep -c .)" -ne 1 ]; then
+            echo "::error::Expected exactly one pinned quota-axi version in INSTALL.md, found: ${pins:-none}"
+            exit 1
+          fi
+          pinned=$pins
+
+          latest=$(npm view quota-axi version)
+          [[ $latest =~ $semver ]] || { echo "::error::Unexpected npm version: $latest"; exit 1; }
+          released=$(npm view quota-axi time --json | node -e '
+            const j = JSON.parse(require("fs").readFileSync(0, "utf8")); // an object, or an array of them on some npm versions
+            const t = (Array.isArray(j) ? j.at(-1) : j)?.[process.argv[1]];
+            if (!t || Number.isNaN(Date.parse(t))) process.exit(1);
+            console.log(new Date(t).toISOString().slice(0, 10));' "$latest")
+          echo "pinned $pinned, npm latest $latest (released $released)"
+
+          gh label create quota-axi --color 5319e7 --description 'quota-axi upstream updates' >/dev/null 2>&1 || true
+          known=$(gh issue list --label quota-axi --state all --limit 200 --json title --jq '.[].title')
+          open_issue() { # title, body; once per title, also when an earlier one was closed
+            if printf '%s\n' "$known" | grep -Fxq -- "$1"; then echo "Issue already exists: $1"; return; fi
+            printf '%s\n' "$2" > body.md
+            gh issue create --title "$1" --label quota-axi --body-file body.md
+          }
+
+          if [ "$latest" != "$pinned" ]; then
+            open_issue "quota-axi $latest is out (pinned: $pinned)" "$(cat <<BODY
+          npm has \`quota-axi@$latest\` (released $released); this layout pins \`$pinned\`.
+
+          - Changes: https://github.com/kunchenguid/quota-axi/compare/quota-axi-v$pinned...quota-axi-v$latest
+          - Changelog: https://github.com/kunchenguid/quota-axi/blob/main/CHANGELOG.md
+
+          To update: read the changes (new endpoints, dependencies, install scripts, \`engines.node\`), install it
+          locally, check that the quota bars still show Claude and Codex, then change the version in INSTALL.md
+          (step 7 table and notes) and README.md (Requirements). Close this issue to skip this version.
+          BODY
+          )"
+          fi
+
+          age=$(( ( $(date -u +%s) - $(date -u -d "$released" +%s) ) / 86400 ))
+          if [ "$age" -gt "$STALE_DAYS" ]; then
+            open_issue "quota-axi: no release for $STALE_DAYS+ days (last $latest, $released)" "$(cat <<BODY
+          The last \`quota-axi\` release is $latest from $released, $age days ago. The quota endpoints it reads are
+          not public APIs and can change; if upstream is no longer maintained, consider forking it or replacing it
+          with a small Claude/Codex-only script. Repository: https://github.com/kunchenguid/quota-axi
+          BODY
+          )"
+          fi
