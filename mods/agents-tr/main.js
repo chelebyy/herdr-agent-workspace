@@ -7,6 +7,8 @@ import { v_flex, h_flex } from "gpui-base";
 import { agents, terminals, panes, focused, spaces, run, theme, shared, setShared, setAgentOrder, openOverlay, closeOverlay, props, window, layout } from "herdr";
 // UI language (shared "ui.lang": "tr" default | "en"); see I18N.md (package root)
 const tx = (tr, en) => (shared("ui.lang") === "en" ? en : tr);
+// A working agent shows a still green light (same green in the agents list, tabs and status bar).
+const WORKING_GREEN = "#22c55e";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -205,9 +207,10 @@ export default class Agents extends View {
   // compact: a ! for blocked where a header already says "Needs you".
   status(t, a, compact = false) {
     const color = t[a.status] ?? t.dim;
-    // Working: the spinner icon held still. A spinning one redraws the whole window every frame while any
-    // agent works (measured: about a third of Herdr's GPU time with two agents working).
-    if (a.status === "working") return svg("mods/workspace-chrome/spinner.svg").size(12).mx(1).flex_none().text_color(t.working);
+    // Working: a still green light, no animation. Anything moving redraws the whole window every frame while
+    // an agent works (measured: about a third of Herdr's GPU time with two agents working). Green is a color
+    // no other status uses.
+    if (a.status === "working") return div().size(8).mx(2).flex_none().rounded(4).bg(WORKING_GREEN);
     if (a.status === "blocked" && compact) return div().size(14).flex_none().rounded(4).bg(t.blocked + "26").text_size(10.5).font_bold().text_color(t.blocked).flex().items_center().justify_center().child("!");
     if (a.status === "blocked") return div().flex_none().px(6).h(18).rounded(5).bg(t.blocked + "26").text_size(10.5).font_semibold().text_color(t.blocked).flex().items_center().child(tx("Sizi bekliyor", "Needs you"));
     // Idle: a ring; done: a dot.
@@ -390,7 +393,7 @@ export default class Agents extends View {
           open ? this.folded.add(g.id) : this.folded.delete(g.id);
           cx.notify();
         })
-        .child(div().truncate().text_color(t[g.status] ?? t.dim).child(g.label))
+        .child(div().truncate().text_color(g.status === "working" ? WORKING_GREEN : t[g.status] ?? t.dim).child(g.label))
         .when(byPriority || !open, (el) => el.child(div().text_color(t.dim).child(String(g.members.length))))
         .child(div().flex_1())
         .when(!open, (el) => el

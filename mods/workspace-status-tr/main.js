@@ -5,6 +5,8 @@ import { spaces, agents, theme, run, window, keys, shared } from "herdr";
 
 // UI language (shared "ui.lang": "tr" default | "en"); see I18N.md (package root)
 const tx = (tr, en) => (shared("ui.lang") === "en" ? en : tr);
+// A working agent shows a still green light (same green in the agents list, tabs and status bar).
+const WORKING_GREEN = "#22c55e";
 
 // Fixed identity hues (7-digit hex, so alpha suffixes stay valid): local machine matches the Settings
 // button, remote machine matches "Add machine", branch matches the opencode/purple accent.
@@ -37,7 +39,7 @@ export default class WorkspaceStatus extends View {
       .child(svg(`mods/workspace-chrome/${icon}.svg`).size(12).flex_none().text_color(color))
       .child(div().max_w(160).truncate().text_size(11).font_medium().text_color(t.foreground).child(text));
     const counts = STATES.map(s => ({ ...s, n: list.filter(a => a.status === s.status).length })).filter(s => s.n > 0);
-    const color = { blocked: t.blocked, working: t.working, done: t.done, idle: t.idle };
+    const color = { blocked: t.blocked, working: WORKING_GREEN, done: t.done, idle: t.idle }; // working: green, as in the agents list and tabs
     const keycap = (k, i) => div().id("key-" + i).flex_none().h(16).px(4).flex().items_center().rounded(4).border_1().border_color(t.border)
       .bg(t.raised).text_size(10).font_medium().text_color(t.muted).child(k);
     const caps = this.paletteKeys();
