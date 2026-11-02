@@ -62,7 +62,11 @@ herdr-app status
 
 `status` must show `"layout": "agent-workspace"` and `"errors": []`.
 
-If no Herdr window is running for this home, both commands fail with "no Herdr wi## 7. Install the missing tools
+If no Herdr window is running for this home, both commands fail with "no Herdr window …". That is not an
+install error: tell the user to start Herdr, pick **agent-workspace** with `ctrl-shift-l`, and run
+`herdr-app status` once it is open.
+
+## 7. Install the missing tools
 
 Check which of these exist (on PATH, or where the note says). Install the missing ones the user agreed to in
 step 3, using the command for this platform. Run user-level installs yourself. A command that needs `sudo` or
@@ -100,9 +104,6 @@ Notes:
 Then report which tools are present, which you installed and which are still missing, and what each missing
 one turns off. Everything works on Windows and Linux. On macOS the GPU gauge and the Agent resources panel are
 not supported yet and the rest is untested; say so if the machine is a Mac.
-
-rks on Windows and Linux. On macOS the GPU gauge and the Agent resources panel are not supported
-yet and the rest is untested; say so if the machine is a Mac.
 
 ## Language
 

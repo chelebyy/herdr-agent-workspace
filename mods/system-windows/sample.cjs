@@ -44,10 +44,10 @@ const nvidia = linux && !nvidiaAwake() ? Promise.resolve(null) : new Promise(res
  const rows = error ? [] : out.trim().split(/\r?\n/).map(l => { const at = l.lastIndexOf(','); return {name: l.slice(0, at).trim(), pct: Number(l.slice(at + 1)), src: 'nvidia-smi'}; }).filter(r => r.name && Number.isFinite(r.pct) && r.pct >= 0 && r.pct <= 100);
  resolve(rows.length ? rows.reduce((a, b) => b.pct > a.pct ? b : a) : null);
 }));
-// AMD cards report their own busy percent in sysfs.
+// AMD cards report their own busy percent in sysfs; a runtime-suspended card is skipped so reading it cannot wake it.
 function amd() {
   let cards;
-  try { cards = fs.readdirSync('/sys/class/drm').filter(n => /^card\d+$/.test(n)); } catch { return null; }
+  try { cards = fs.readdirSync('/sys/class/drm').filter(n => /^card\d+$/.test(n) && (read(`/sys/class/drm/${n}/device/power/runtime_status`) || '').trim() !== 'suspended'); } catch { return null; }
   const rows = cards.map(card => ({card, pct: Number(read(`/sys/class/drm/${card}/device/gpu_busy_percent`))})).filter(r => read(`/sys/class/drm/${r.card}/device/gpu_busy_percent`) !== null && r.pct >= 0 && r.pct <= 100);
   return rows.length ? {...rows.reduce((a, b) => b.pct > a.pct ? b : a), name: 'AMD GPU', src: 'sysfs'} : null;
 }
