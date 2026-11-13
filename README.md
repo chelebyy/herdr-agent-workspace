@@ -22,7 +22,7 @@ All screenshots use demo project names; the interface is shown in English (Turki
 
 ## Features
 
-- **Sidebar (360px):** CPU / RAM / GPU gauges, Claude and Codex quota bars with reset timers and pace markers, Spaces with git branch and ahead/behind, Agents list, team pulse panel, footer with Settings, Add machine and the language switch. Gauges can move to the bottom status bar.
+- **Sidebar (360px):** CPU / RAM / GPU gauges, Claude and Codex quota bars with reset timers and pace markers, Spaces with git branch and ahead/behind in colored folders (drag spaces in, fold them, let a folder collect a project's spaces by rule), Agents list, team pulse panel, footer with Settings, Add machine and the language switch. Gauges can move to the bottom status bar.
 - **Agents list:** sorted by priority (Needs you, Done, Working, Idle) or grouped by space; pinning; sub-agent trees; time since last change.
 - **Status bar:** machine, git branch and agent counts by state, plus the command-palette key.
 - **Task presets:** a dialog that starts "Investigate a bug", "Review changes" or "Run tests" in a new tab with one installed agent, or with a small Codex / Claude / OpenCode team (coordinated or parallel review).
@@ -88,14 +88,15 @@ Read this before installing. Listed from the code of each mod.
 | `android-devices` | `node android.cjs`, which runs `adb devices -l`, `adb shell dumpsys activity activities`, `adb emu avd name`, `adb exec-out screencap -p`, `emulator -list-avds`, `emulator -avd <name>`; every 5 s while the panel is open |
 | `task-presets-tr` | `node team-runner.cjs catalog` (runs `codex debug models`, `claude --help`, `opencode api model.list`) and `node team-runner.cjs run <file>` (runs the chosen CLIs with read-only / plan settings); a normal task starts the agent you picked in a new tab with the task text; opens the system folder picker |
 | `files-tr` | `powershell` (Windows, local) or `sh` to list folders; `git rev-parse`, `git status` in the focused pane's folder |
-| `spaces-tr` | `git status`, `git rev-parse` in each space's folder; `hc machine ls --json` every 15 s |
+| `space-folders` | `git status`, `git rev-parse` in each space's folder; `hc machine ls --json` every 15 s; on other machines `sh` to read and write `~/.config/herdr-space-folders.json` and print `$HOME`; opens the system folder picker |
+| `spaces-tr` (not in the layout; the no-folders choice) | `git status`, `git rev-parse` in each space's folder; `hc machine ls --json` every 15 s |
 | `menu-tr` | `git rev-parse` in a space's folder when its menu opens |
 
 The other mods (`workspace-chrome-tr`, `workspace-status-tr`, `agents-tr`, `tabs-tr`, `new-menu-tr`, `monitor-position`, `team-pulse`) only draw UI and call Herdr commands (for example `tab.new`, `layout.toggle`, `pane.focus`); `new-menu-tr` starts the agent or terminal you choose.
 
 **Files read outside a mod's own folder:**
 - `files-tr` lists the focused pane's folder (also on remote machines) and reads the text of files you click, and watches that folder for changes.
-- `spaces-tr` and `menu-tr` read git state of your spaces' folders; `spaces-tr` also watches those repositories.
+- `space-folders` (or `spaces-tr`) and `menu-tr` read git state of your spaces' folders; `space-folders` / `spaces-tr` also watch those repositories.
 - `task-presets-tr` / `team-runner.cjs` read the folder you pick (through the CLIs) and the request file they wrote; outside Windows it may start your login shell once to find the CLIs.
 - `system-windows` (Linux) reads GPU counters from `/sys/class/drm` and the DRM entries in `/proc/<pid>/fdinfo` of your processes.
 - `agent-resources-tr` reads the process list of the machine (CPU time, memory, parent ids) and keeps the ones belonging to your agents' terminals.
@@ -104,6 +105,7 @@ The other mods (`workspace-chrome-tr`, `workspace-status-tr`, `agents-tr`, `tabs
 **Files written:**
 - `task-presets-tr`: `<Herdr home>/data/team-request-*.json` (your team request; nothing deletes it) and `<Herdr home>/data/team-runs/<run>/` with the config, per-role outputs and `result.md`.
 - `android-devices`: screenshots in `~/Pictures/Herdr/`, emulator logs in `<Herdr home>/data/android-devices/` (`HERDR_APP_HOME`, else `~/.config/herdr-app`).
+- `space-folders`: your folders in `~/.config/herdr-space-folders.json` on each machine its spaces run on (the same file and format as jankeesvw/herdr-space-folders).
 - Small remembered settings in Herdr's shared store and each mod's local storage (language, sort order, pins, colors, panel choices, gauge position, quota options).
 
 ## Language
@@ -116,6 +118,7 @@ Task and brief text sent to agents stays Turkish **by design**: the preset brief
 
 - This package is licensed under **Apache-2.0** (see `LICENSE`).
 - `agents-tr`, `files-tr`, `menu-tr`, `new-menu-tr`, `spaces-tr`, `tabs-tr`, `workspace-chrome-tr` and `workspace-status-tr` are translated, modified copies of mods shipped with Herdr (Apache-2.0).
+- `space-folders` is a translated, modified copy of [jankeesvw/herdr-space-folders](https://github.com/jankeesvw/herdr-space-folders) (MIT, Copyright (c) 2026 Jankees van Woezik), which started from Herdr's Spaces mod (Apache-2.0).
 - `quota` and `system-windows` are modified from [Lakris2407/herdr-quota](https://github.com/Lakris2407/herdr-quota) (MIT, Copyright (c) 2026 Lakris2407).
 - Most SVG icons copied from Herdr's mods are Lucide icons (ISC) with Feather-derived icons (MIT); see `LICENSE-Lucide.txt`. The window controls and the `spinner`, `sidebar`, `branch`, `monitor`, `search` and `server` icons are Herdr's own (Apache-2.0).
-- See `NOTICE` for the credits to Herdr and Lakris2407/herdr-quota and a statement of the changes. `space-folders` is not included; `spaces-tr` (a copy of Herdr's stock Spaces) is used instead. For folders in the spaces list, INSTALL.md step 8 can install [jankeesvw/herdr-space-folders](https://github.com/jankeesvw/herdr-space-folders) separately from its own repository (it has no license, so it is not bundled).
+- See `NOTICE` for the credits to Herdr, Lakris2407/herdr-quota and jankeesvw/herdr-space-folders and a statement of the changes.

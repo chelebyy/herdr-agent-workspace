@@ -31,7 +31,7 @@ Summarise the README's **What it runs** section for the user in a few lines: whi
 the chosen AI providers, and which files are written outside the mods' own folders. Also check now which tools
 from step 7 are missing and list the ones you will install. Continue only when the user agrees; that answer
 covers the installs in step 7 (the user may leave some out). Also ask whether they want folders in the
-spaces list (step 8); install that only on a yes.
+spaces list (step 8); they are on by default, and a no switches the list to `spaces-tr` in step 4.
 
 ## 4. Copy without overwriting
 
@@ -45,6 +45,14 @@ spaces list (step 8); install that only on a yes.
     `openOverlay({ mod: "<name>" ... })` (search for the old name in quotes).
   A renamed mod keeps its shared-store keys (for example `quota.*`); mention this if the user's own mod
   with that name might use the same keys.
+- `mods/space-folders` may already be there from jankeesvw/herdr-space-folders (an earlier version of this
+  guide installed it in step 8; its `mod.json` title is "Space folders"). It is the same mod in English and
+  uses the same folders file. Show the user `git diff --no-index <Herdr home>/mods/space-folders mods/space-folders`;
+  on a yes, replace that folder instead of renaming ours (keep a copy of the old one). On a no, rename ours as
+  above.
+- If the user said no to folders in step 3, change the copied layout's spaces block (`"id": "spaces"`) from
+  `"mod": "space-folders"` to `"mod": "spaces-tr"` (or the names chosen above) now, before step 6 switches to
+  it, and do not copy `mods/space-folders`.
 - Keep each file's line endings when you edit it (the files use CRLF).
 - Do not copy `README.md`, `RECIPE.md`, `INSTALL.md`, `I18N.md`, `LICENSE*`, `NOTICE`, `preview.png`,
   `screenshots/`, `.gitignore` or `.herdr-export.json`.
@@ -110,41 +118,23 @@ Then report which tools are present, which you installed and which are still mis
 one turns off. Everything works on Windows and Linux. On macOS the GPU gauge and the Agent resources panel are
 not supported yet and the rest is untested; say so if the machine is a Mac.
 
-## 8. Optional: folders in the spaces list
+## 8. Folders in the spaces list
 
-Only if the user said yes in step 3. Folders that group spaces (a folder button next to "+", drag and drop,
-start folders, rules) come from a separate mod, [jankeesvw/herdr-space-folders](https://github.com/jankeesvw/herdr-space-folders).
-It is a third-party project with no license file, so it is not part of this package: install it from its own
-repository on this machine only, and tell the user that. Its interface is English.
+The layout's spaces list is `space-folders`: folders that group spaces (a folder button next to "+", drag and
+drop, start folders, rules, colors). It is a translated copy of
+[jankeesvw/herdr-space-folders](https://github.com/jankeesvw/herdr-space-folders) (MIT) and keeps its folders
+per machine in `~/.config/herdr-space-folders.json`, the same file and format as that project, so folders made
+with it before are kept.
 
-It keeps its folders by running POSIX `sh` (`cat`, `mkdir`, `mv` on `~/.config/herdr-space-folders.json`), and
-its path rules expand `~` only for Unix homes. On Windows, check first that `sh` is on PATH
-(`Get-Command sh`, usually from Git for Windows); without it, folders are not saved and are gone after a
-restart, so tell the user and skip this step unless they still want it. Path rules written with Windows paths
-do not match.
-
-1. Clone it into a folder of the user's choice (for example next to this package) and check out the tested
-   commit: `git clone https://github.com/jankeesvw/herdr-space-folders.git <folder>` then
-   `git -C <folder> checkout cb83ff4aeed32b674fb8fe66b183ae60fe8944f6`. Install a newer commit only if the
-   user asks for it after you have shown them `git -C <folder> diff cb83ff4aeed32b674fb8fe66b183ae60fe8944f6..origin/HEAD -- mods/`
-   and they agree.
-2. Read every file in `mods/space-folders` before copying and tell the user in a line what it runs. At the
-   tested commit that is `sh` reading and writing its own file `~/.config/herdr-space-folders.json` (and
-   printing `$HOME`) on each machine its spaces run on, `git status` / `git rev-parse` in the spaces' folders
-   and `hc machine ls`; no network. Stop and ask if it runs or contacts anything else.
-3. Copy (do not symlink: Herdr does not notice changes inside a linked mod folder) `mods/space-folders` to
-   `<Herdr home>/mods/space-folders`, unless that folder exists (then ask). Run
-   `herdr-app check "<Herdr home>/mods/space-folders"`.
-4. In the installed layout from step 4 (`<Herdr home>/layouts/agent-workspace.json`, or the name chosen there),
-   keep a copy of the file, then change the spaces block (`"id": "spaces"`) from `"mod": "spaces-tr"` (or the
-   name chosen in step 4) to `"mod": "space-folders"`. Then `herdr-app do layout.switch --name <that layout>`
-   and check `herdr-app status` for errors.
+- On this computer it reads and writes that file with Herdr's own file functions; no `sh` is needed.
+- For spaces on another machine it runs POSIX `sh` there (`cat`, `mkdir`, `mv` on that file, and printing
+  `$HOME`). A remote Windows machine without `sh` on PATH keeps no folders; say so if the user has one.
+- If the user said no to folders in step 3, step 4 already set the spaces block to `spaces-tr`; nothing here.
 
 Tell the user: folders are kept per machine, so folders made on another computer do not appear here; the
-folder button next to "+" makes one, right-click edits it. To update later: fetch in the clone, show the user
-the diff of `mods/space-folders`, and copy the newer folder only after they agree. To undo: put the layout copy
-back (or set the spaces block back to the original mod). Reinstalling this package's layout also puts
-`spaces-tr` back.
+folder button next to "+" makes one (it gets a color no other folder has), right-click colors, edits or
+deletes it. To go without folders later, keep a copy of the installed layout, set its spaces block to
+`spaces-tr` (or the name chosen for it in step 4), run `herdr-app do layout.switch --name <that layout>` and check `herdr-app status` for errors.
 
 ## Language
 
@@ -154,4 +144,5 @@ sidebar (the choice is remembered).
 ## Undo
 
 The user's own layout is untouched: `ctrl-shift-l` switches back. To remove this layout, delete
-`<Herdr home>/layouts/agent-workspace.json` and the copied mod folders (and `mods/space-folders` if step 8 added it).
+`<Herdr home>/layouts/agent-workspace.json` and the copied mod folders. Folders stay in
+`~/.config/herdr-space-folders.json`; delete that file too if the user wants them gone.

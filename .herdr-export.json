@@ -32,6 +32,8 @@
     "mods/new-menu-tr/mod.json",
     "mods/quota/main.js",
     "mods/quota/mod.json",
+    "mods/space-folders/main.js",
+    "mods/space-folders/mod.json",
     "mods/spaces-tr/main.js",
     "mods/spaces-tr/mod.json",
     "mods/system-windows/main.js",

@@ -60,7 +60,7 @@
               "id": "spaces",
               "type": "block",
               "content": {
-                "mod": "spaces-tr"
+                "mod": "space-folders"
               },
               "size": {
                 "weight": 1

@@ -78,7 +78,7 @@ root: row
     sidebar-system: block, 48px            mod system-windows  props {monitorSlot: "sidebar-system", sidebar: true}
     sidebar-quota: block, 145px            mod quota  props {monitorSlot: "sidebar-quota", sidebar: true, providers: ["claude","codex"]}
     sidebar-lists: column
-      spaces: block, weight 1, min 90      mod spaces-tr
+      spaces: block, weight 1, min 90      mod space-folders (spaces-tr without folders)
       agents: block, weight 1, min 90      mod agents-tr
     team-pulse-panel: block, 211px         mod team-pulse
     sidebar-footer: block, 69px            mod workspace-chrome-tr  props {footer: true}
@@ -105,7 +105,7 @@ root: row
 
 `sidebar-system` and `sidebar-quota` also carry `hidden: false`. The "Gauges" popup flips these between sidebar and status bar with `layout.show` / `layout.hide`.
 
-**Stock Herdr mods the layout still needs** (not in this package, shipped with Herdr): `workspace-chrome` (brand block, and its SVG icons used by agents-tr, spaces-tr, menu-tr, new-menu-tr, workspace-status-tr), `pane` (pane header; `close.svg` used by tabs-tr), `files` and `changes` (icons used by tabs-tr), `picker` (search), `machine-add` (Add machine), `worktree` (worktree dialogs), `icons/` (agent and shell icons).
+**Stock Herdr mods the layout still needs** (not in this package, shipped with Herdr): `workspace-chrome` (brand block, and its SVG icons used by agents-tr, space-folders, spaces-tr, menu-tr, new-menu-tr, workspace-status-tr), `pane` (pane header; `close.svg` used by tabs-tr), `files` and `changes` (icons used by tabs-tr), `picker` (search), `machine-add` (Add machine), `worktree` (worktree dialogs), `icons/` (agent and shell icons).
 
 **Mods** (all `place: "none"`; `task-presets-tr` also `overlay: {kind: "dialog", width: 900, height: 820}`). Each mod reads the language with `const tx = (tr, en) => shared("ui.lang") === "en" ? en : tr`, called at render time only.
 
@@ -113,6 +113,7 @@ Clones of Herdr's shipped mods, translated (Apache-2.0, cloned with `mod.clone` 
 - `workspace-chrome-tr`: footer variant (`props.footer`) with the two pills, version line and `TR | EN` switch; `setShared("ui.lang", ...)`. Calls `run("app.settings")`, `run("mod.open", {name: "machine-add"})`, `run("app.whats_new")`, `run("layout.resize", {id: "sidebar", px})`, reads `updates()`. Pill hues `#9aa8ff`, `#f0a868`, update badge `#ecc05a`. Icons `settings.svg`, `plus.svg` plus the rest of the stock icon set in its folder.
 - `workspace-status-tr`: `spaces()`, `agents()`, `keys()`; calls `run("app.palette")`. Hues `#9aa8ff`, `#f0a868`, `#b892f5`.
 - `agents-tr`: `agents()`, `terminals()`, `panes()`, `focused()`, `setAgentOrder()`; `run("pane.focus")`, `run("terminal.peek")`, `run("layout.resize")`; popup via `openOverlay({mod: "agents-tr", kind: "popup", width: 200, height: 140, props: {sortMenu: true}})`; shared key `agents.sort`; `localStorage` keys `changed`, `pins`.
+- `space-folders` (translated copy of jankeesvw/herdr-space-folders, MIT): everything `spaces-tr` does below, plus folders above the loose spaces per machine: an 18px tile in the folder's color (grey or one of thirteen: the avatars' six and `#e5534b #d4b22c #8fbf3a #2fb5d6 #5f63e8 #a0714f #8494a8`), name, count, chevron; drag spaces in or out, drag folders to reorder, fold; right-click menu (210 by at most 220) with fourteen color dots in two rows, "Otomatik renk" (a color no other folder has), "Burada yeni alan", "Klasörü düzenle…", "Klasörü sil"; the edit dialog (460px: Ad, start folder with "Seç…", "Alanları şuradan topla" rules, İptal / Kaydet) adds a new folder only on Save, names it after the picked folder until a name is typed, and gives it an unused color. Kept in `~/.config/herdr-space-folders.json` (Herdr's `readTextFile`/`writeTextFile` here, `sh` on other machines), mirrored in shared key `space-folders`; `nextCommand()` takes `space-folders.next` / `.prev`.
 - `spaces-tr`: `spaces()`, `machines()`, `panes()`, `watchFolder()`; `run("space.new" | "space.select" | "space.move")`; `hc(["machine", "ls", "--json"])` every 15s; `git status --porcelain=v2 --branch` and `git rev-parse` per space folder; shared key `space.colors`; `localStorage` key `machines.folded`; right-click opens `menu-tr` (`props {tab: "space"}`).
 - `tabs-tr`: `run("tab.select" | "tab.rename" | "tab.move" | "tab.close" | "layout.select" | "layout.show" | "layout.hide" | "window.minimize" | "window.maximize" | "window.close" | "tab.prev" | "tab.next")`; popups `menu-tr` and `new-menu-tr` (250 wide, 512 high); `localStorage` key `panels`; SVGs `win-min`, `win-max`, `win-restore`, `win-close`.
 - `new-menu-tr`: `knownAgents()`, `run("tab.new")`, `run("space.new")`, opens `worktree` dialogs (460x280 and 560x480).
