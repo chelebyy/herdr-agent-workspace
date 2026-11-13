@@ -134,7 +134,7 @@ with it before are kept.
 Tell the user: folders are kept per machine, so folders made on another computer do not appear here; the
 folder button next to "+" makes one (it gets a color no other folder has), right-click colors, edits or
 deletes it. To go without folders later, keep a copy of the installed layout, set its spaces block to
-`spaces-tr`, run `herdr-app do layout.switch --name <that layout>` and check `herdr-app status` for errors.
+`spaces-tr` (or the name chosen for it in step 4), run `herdr-app do layout.switch --name <that layout>` and check `herdr-app status` for errors.
 
 ## Language
 
