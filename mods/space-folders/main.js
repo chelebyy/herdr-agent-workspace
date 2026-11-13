@@ -84,7 +84,7 @@ const collects = (f, path) => Boolean(path) && (f.match ?? "").split(",").some((
 // that takes ~/code/client wins over one that takes ~/code; a bare "*" reaches
 // least (it matches the first slash) but still counts.
 const reach = (f, path) => !path ? 0 : Math.max(0, ...(f.match ?? "").split(",").map((p) => {
-  const m = rule(p)?.exec(path);
+  const m = rule(p)?.exec(path.replace(/\\/g, "/"));
   return m ? 1 + m.index + m[0].replace(/\/$/, "").length : 0;
 }));
 
@@ -97,7 +97,7 @@ function deepest(list, score) {
 
 // Where a space goes: where it was dragged (or "" for out of every folder), else
 // the folder whose rules reach deepest into the folder it works in.
-function folderOf(s, { list, of }, ps) {
+export function folderOf(s, { list, of }, ps) {
   const id = of[localId(s)];
   if (id !== undefined) return list.some((f) => f.id === id) ? id : null;
   return deepest(list, (f) => reach(f, place(s, ps)));

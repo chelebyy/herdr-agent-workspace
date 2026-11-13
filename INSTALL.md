@@ -31,7 +31,7 @@ Summarise the README's **What it runs** section for the user in a few lines: whi
 the chosen AI providers, and which files are written outside the mods' own folders. Also check now which tools
 from step 7 are missing and list the ones you will install. Continue only when the user agrees; that answer
 covers the installs in step 7 (the user may leave some out). Also ask whether they want folders in the
-spaces list (step 8); they are on by default, and a no switches the list to `spaces-tr`.
+spaces list (step 8); they are on by default, and a no switches the list to `spaces-tr` in step 4.
 
 ## 4. Copy without overwriting
 
@@ -50,6 +50,9 @@ spaces list (step 8); they are on by default, and a no switches the list to `spa
   uses the same folders file. Show the user `git diff --no-index <Herdr home>/mods/space-folders mods/space-folders`;
   on a yes, replace that folder instead of renaming ours (keep a copy of the old one). On a no, rename ours as
   above.
+- If the user said no to folders in step 3, change the copied layout's spaces block (`"id": "spaces"`) from
+  `"mod": "space-folders"` to `"mod": "spaces-tr"` (or the names chosen above) now, before step 6 switches to
+  it, and do not copy `mods/space-folders`.
 - Keep each file's line endings when you edit it (the files use CRLF).
 - Do not copy `README.md`, `RECIPE.md`, `INSTALL.md`, `I18N.md`, `LICENSE*`, `NOTICE`, `preview.png`,
   `screenshots/`, `.gitignore` or `.herdr-export.json`.
@@ -126,13 +129,12 @@ with it before are kept.
 - On this computer it reads and writes that file with Herdr's own file functions; no `sh` is needed.
 - For spaces on another machine it runs POSIX `sh` there (`cat`, `mkdir`, `mv` on that file, and printing
   `$HOME`). A remote Windows machine without `sh` on PATH keeps no folders; say so if the user has one.
-- If the user said no to folders in step 3, keep a copy of the installed layout, then change its spaces block
-  (`"id": "spaces"`) from `"mod": "space-folders"` to `"mod": "spaces-tr"` (or the names chosen in step 4),
-  run `herdr-app do layout.switch --name <that layout>` and check `herdr-app status` for errors.
+- If the user said no to folders in step 3, step 4 already set the spaces block to `spaces-tr`; nothing here.
 
 Tell the user: folders are kept per machine, so folders made on another computer do not appear here; the
 folder button next to "+" makes one (it gets a color no other folder has), right-click colors, edits or
-deletes it. To go without folders later, set the spaces block to `spaces-tr` as above.
+deletes it. To go without folders later, keep a copy of the installed layout, set its spaces block to
+`spaces-tr`, run `herdr-app do layout.switch --name <that layout>` and check `herdr-app status` for errors.
 
 ## Language
 
