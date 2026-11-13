@@ -114,8 +114,8 @@ not supported yet and the rest is untested; say so if the machine is a Mac.
 
 Only if the user said yes in step 3. Folders that group spaces (a folder button next to "+", drag and drop,
 start folders, rules) come from a separate mod, [jankeesvw/herdr-space-folders](https://github.com/jankeesvw/herdr-space-folders).
-It is a third-party project with no license file, so it is not part of this package: install it from its own
-repository on this machine only, and tell the user that. Its interface is English.
+It is a third-party project (MIT License) kept out of this package so it updates from its author: install it
+from its own repository on this machine only, and tell the user that. Its interface is English.
 
 It keeps its folders by running POSIX `sh` (`cat`, `mkdir`, `mv` on `~/.config/herdr-space-folders.json`), and
 its path rules expand `~` only for Unix homes. On Windows, check first that `sh` is on PATH
@@ -125,9 +125,10 @@ do not match.
 
 1. Clone it into a folder of the user's choice (for example next to this package) and check out the tested
    commit: `git clone https://github.com/jankeesvw/herdr-space-folders.git <folder>` then
-   `git -C <folder> checkout cb83ff4aeed32b674fb8fe66b183ae60fe8944f6`. Install a newer commit only if the
-   user asks for it after you have shown them `git -C <folder> diff cb83ff4aeed32b674fb8fe66b183ae60fe8944f6..origin/HEAD -- mods/`
-   and they agree.
+   `git -C <folder> checkout 63a78b20d5ed30d57166a3c7165a6eb558c3ef84`. Install a newer commit only if the
+   user asks for it after you have shown them `git -C <folder> diff 63a78b20d5ed30d57166a3c7165a6eb558c3ef84..origin/HEAD -- mods/`
+   and they agree. Copy only `mods/space-folders`: the repository's `keys.json` and `layouts/` belong to its own
+   `main-folders` layout, not to this package's.
 2. Read every file in `mods/space-folders` before copying and tell the user in a line what it runs. At the
    tested commit that is `sh` reading and writing its own file `~/.config/herdr-space-folders.json` (and
    printing `$HOME`) on each machine its spaces run on, `git status` / `git rev-parse` in the spaces' folders
